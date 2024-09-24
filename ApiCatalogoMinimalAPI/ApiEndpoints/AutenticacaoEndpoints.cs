@@ -17,22 +17,29 @@ namespace ApiCatalogoMinimalAPI.ApiEndpoints
 
                 if (userModel.UserName == "camille" && userModel.Password == "teste") {
 
-                    var tokenString = tokenService.GerarToken(app.Configuration["Jwt:Key"],
-                        app.Configuration["Jwt:issuer"],
-                        app.Configuration["Jwt:Audience"],
-                        userModel);
+                    // Recuperando a chave JWT do ambiente
+                    string key = Environment.GetEnvironmentVariable("JwtKeyEnvironmentVariable", EnvironmentVariableTarget.Machine);
+                    string issuer = app.Configuration["Jwt:Issuer"];
+                    string audience = app.Configuration["Jwt:Audience"];
+
+                    // Verifique se esses valores não são nulos
+                    if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(issuer) || string.IsNullOrEmpty(audience)) {
+                        return Results.BadRequest("Configurações do JWT estão ausentes.");
+                    }
+
+                    var tokenString = tokenService.GerarToken(key, issuer, audience, userModel);
 
                     return Results.Ok(new { token = tokenString });
                 }
                 else {
                     return Results.BadRequest("Login inválido.");
                 }
-            }).Produces(StatusCodes.Status400BadRequest)
-              .Produces(StatusCodes.Status200OK)
-              .WithName("Login")
-              .WithTags("Autenticacao");
-
-
+            })
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status200OK)
+            .WithName("Login")
+            .WithTags("Autenticacao");
         }
     }
+
 }

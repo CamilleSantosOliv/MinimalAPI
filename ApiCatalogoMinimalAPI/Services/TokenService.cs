@@ -10,16 +10,19 @@ namespace ApiCatalogoMinimalAPI.Services
     {
         public string GerarToken(string key, string issuer, string audience, UserModel user)
         {
-            var claims = new[] //declarações do usuario (para gerar o token)
+            if (string.IsNullOrEmpty(key)) {
+                throw new Exception("A chave JWT não está configurada ou não foi recuperada corretamente.");
+            }
+
+            var claims = new[]
             {
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString())
-            }; //compor o payload do token
+            };
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
 
-            var credentials = new SigningCredentials(securityKey,
-                                                      SecurityAlgorithms.HmacSha256);
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(issuer: issuer,
                                              audience: audience,
@@ -29,7 +32,9 @@ namespace ApiCatalogoMinimalAPI.Services
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var stringToken = tokenHandler.WriteToken(token);
+
             return stringToken;
         }
+
     }
 }

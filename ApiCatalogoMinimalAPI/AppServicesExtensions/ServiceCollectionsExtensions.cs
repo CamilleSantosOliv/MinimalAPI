@@ -58,11 +58,16 @@ namespace ApiCatalogoMinimalAPI.AppServicesExtensions
             return services;
         }
 
-        //autenticação com jwt
         public static WebApplicationBuilder AppPersistence(this WebApplicationBuilder builder)
         {
+            // Carregar as variáveis de ambiente
+            builder.Configuration.AddEnvironmentVariables();
+
+            string connectionString = builder.Configuration["ConnectionStringEnvironmentVariable"]
+        ?? throw new Exception("Connection string is not configured.");
+
             builder.Services.AddDbContext<AppDbContext>(options =>
-                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(connectionString));
 
             builder.Services.AddSingleton<ITokenService>(new TokenService());
 
@@ -72,24 +77,26 @@ namespace ApiCatalogoMinimalAPI.AppServicesExtensions
 
         public static WebApplicationBuilder AddAutentication(this WebApplicationBuilder builder)
         {
+            string jwtKey = Environment.GetEnvironmentVariable("JwtKeyEnvironmentVariable", EnvironmentVariableTarget.Machine);
+
+            if (string.IsNullOrEmpty(jwtKey)) {
+                throw new Exception("A chave JWT não está configurada ou não foi recuperada corretamente.");
+            }
+
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options => {
-                    options.TokenValidationParameters = new TokenValidationParameters {
-
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey
-                        (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-                    };
-                });
+               .AddJwtBearer(options => {
+                   options.TokenValidationParameters = new TokenValidationParameters {
+                       ValidateIssuer = true,
+                       ValidateAudience = true,
+                       ValidateLifetime = true,
+                       ValidateIssuerSigningKey = true,
+                       ValidIssuer = builder.Configuration["Jwt:Issuer"],  // Certifique-se de que Jwt:Issuer está correto
+                       ValidAudience = builder.Configuration["Jwt:Audience"], // Verifique se Jwt:Audience está corretamente definido
+                       IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)) // Usando a chave JWT
+                   };
+               });
 
             builder.Services.AddAuthorization();
-
 
             return builder;
         }
