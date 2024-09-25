@@ -64,7 +64,7 @@ namespace ApiCatalogoMinimalAPI.AppServicesExtensions
             builder.Configuration.AddEnvironmentVariables();
 
             string connectionString = builder.Configuration["ConnectionStringEnvironmentVariable"]
-        ?? throw new Exception("Connection string is not configured.");
+        ?? throw new Exception("String de conexão não foi encontrada.");
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(connectionString));
@@ -90,9 +90,9 @@ namespace ApiCatalogoMinimalAPI.AppServicesExtensions
                        ValidateAudience = true,
                        ValidateLifetime = true,
                        ValidateIssuerSigningKey = true,
-                       ValidIssuer = builder.Configuration["Jwt:Issuer"],  // Certifique-se de que Jwt:Issuer está correto
-                       ValidAudience = builder.Configuration["Jwt:Audience"], // Verifique se Jwt:Audience está corretamente definido
-                       IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)) // Usando a chave JWT
+                       ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                       ValidAudience = builder.Configuration["Jwt:Audience"],
+                       IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)) 
                    };
                });
 

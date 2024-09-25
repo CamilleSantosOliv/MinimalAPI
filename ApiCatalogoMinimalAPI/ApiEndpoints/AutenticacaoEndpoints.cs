@@ -22,7 +22,6 @@ namespace ApiCatalogoMinimalAPI.ApiEndpoints
                     string issuer = app.Configuration["Jwt:Issuer"];
                     string audience = app.Configuration["Jwt:Audience"];
 
-                    // Verifique se esses valores não são nulos
                     if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(issuer) || string.IsNullOrEmpty(audience)) {
                         return Results.BadRequest("Configurações do JWT estão ausentes.");
                     }

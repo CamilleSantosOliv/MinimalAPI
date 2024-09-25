@@ -28,7 +28,7 @@ namespace ApiCatalogoMinimalAPI.Services
                                              audience: audience,
                                              claims: claims,
                                              expires: DateTime.Now.AddMinutes(10),
-                                             signingCredentials: credentials); //formação do token
+                                             signingCredentials: credentials); 
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var stringToken = tokenHandler.WriteToken(token);
